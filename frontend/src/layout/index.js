@@ -245,7 +245,7 @@ const LoggedInLayout = ({ children }) => {
                     <>
                       <Avatar
                         alt="foto de perfil atual"
-                        src={"http://localhost:8080/" + profileImage}
+                        src={`${process.env.REACT_APP_BACKEND_URL}${profileImage}`}
                         className={classes.small}
 
                       />

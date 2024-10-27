@@ -109,7 +109,7 @@ const UserModal = ({ open, onClose, userId }) => {
         const { data } = await api.get(`/users/${userId}`);
         
        
-        const imageUrl = data.imagePath ? `http://localhost:8080/${data.imagePath}` : ""; //trocar por env
+        const imageUrl = data.imagePath ? `${process.env.REACT_APP_BACKEND_URL}${data.imagePath}` : ""; //trocar por env
   
         setUser((prevState) => ({ 
           ...prevState, 
