@@ -12,6 +12,7 @@ import {
   MenuItem,
   IconButton,
   Menu,
+  Avatar
 } from "@material-ui/core";
 
 import MenuIcon from "@material-ui/icons/Menu";
@@ -107,6 +108,10 @@ const useStyles = makeStyles((theme) => ({
     overflow: "auto",
     flexDirection: "column",
   },
+  small: {
+    width: theme.spacing(3),
+    height: theme.spacing(3),
+  },
 }));
 
 const LoggedInLayout = ({ children }) => {
@@ -118,6 +123,7 @@ const LoggedInLayout = ({ children }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerVariant, setDrawerVariant] = useState("permanent");
   const { user } = useContext(AuthContext);
+  const [profileImage, setProfileImage] = useState(user.imagePath);
 
   useEffect(() => {
     if (document.body.offsetWidth > 600) {
@@ -132,6 +138,10 @@ const LoggedInLayout = ({ children }) => {
       setDrawerVariant("permanent");
     }
   }, [drawerOpen]);
+
+  useEffect(() => {
+    setProfileImage(user.imagePath);
+  }, [user.imagePath]);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -217,11 +227,12 @@ const LoggedInLayout = ({ children }) => {
             noWrap
             className={classes.title}
           >
-            WhaTicket
+            Desk 
           </Typography>
           {user.id && <NotificationsPopOver />}
 
           <div>
+            
             <IconButton
               aria-label="account of current user"
               aria-controls="menu-appbar"
@@ -229,7 +240,21 @@ const LoggedInLayout = ({ children }) => {
               onClick={handleMenu}
               color="inherit"
             >
-              <AccountCircle />
+              {
+                profileImage ? 
+                    <>
+                      <Avatar
+                        alt="foto de perfil atual"
+                        src={`${process.env.REACT_APP_BACKEND_URL}${profileImage}`}
+                        className={classes.small}
+
+                      />
+                    </>
+                  : 
+                    <AccountCircle 
+                      alt="esta sem foto de perfil"
+                    />
+              }
             </IconButton>
             <Menu
               id="menu-appbar"
@@ -264,5 +289,4 @@ const LoggedInLayout = ({ children }) => {
     </div>
   );
 };
-
 export default LoggedInLayout;
