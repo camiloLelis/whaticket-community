@@ -20,7 +20,7 @@ interface Request {
 const CreateMessageService = async ({
   messageData
 }: Request): Promise<Message> => {
-  await Message.upsert(messageData);
+  await Message.create(messageData);
 
   const message = await Message.findByPk(messageData.id, {
     include: [
@@ -59,7 +59,6 @@ const CreateMessageService = async ({
       ticket: message.ticket,
       contact: message.ticket.contact
     });
-
   return message;
 };
 

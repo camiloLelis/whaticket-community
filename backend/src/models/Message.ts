@@ -8,10 +8,12 @@ import {
   PrimaryKey,
   Default,
   BelongsTo,
-  ForeignKey
+  ForeignKey,
+  AfterCreate 
 } from "sequelize-typescript";
 import Contact from "./Contact";
 import Ticket from "./Ticket";
+import  { syncMessageToElasticSearch } from "../services/MessageSyncService/"; // Função para sincronizar com Elasticsearch
 
 @Table
 class Message extends Model<Message> {
@@ -37,9 +39,7 @@ class Message extends Model<Message> {
   @Column(DataType.STRING)
   get mediaUrl(): string | null {
     if (this.getDataValue("mediaUrl")) {
-      return `${process.env.BACKEND_URL}:${
-        process.env.PROXY_PORT
-      }/public/${this.getDataValue("mediaUrl")}`;
+      return `${process.env.BACKEND_URL}:${process.env.PROXY_PORT}/public/${this.getDataValue("mediaUrl")}`;
     }
     return null;
   }
@@ -79,6 +79,12 @@ class Message extends Model<Message> {
 
   @BelongsTo(() => Contact, "contactId")
   contact: Contact;
+
+  // Hook @AfterCreate para chamar a sincronização com o Elasticsearch após a criação
+  @AfterCreate
+  static async syncToElasticSearch(message: Message) {
+    await syncMessageToElasticSearch(message); // Função que você já tem para enviar para o Elasticsearch
+  }
 }
 
 export default Message;
