@@ -9,6 +9,8 @@ import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import DeleteWhatsAppMessage from "../services/WbotServices/DeleteWhatsAppMessage";
 import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
+import SearchMessagesService from "../services/MessageServices/SearchMessagesService";
+import  { SearchService } from "../services/SearchService"
 
 type IndexQuery = {
   pageNumber: string;
@@ -73,3 +75,27 @@ export const remove = async (
 
   return res.send();
 };
+
+
+export const searchMessagesControlerasync = async (req: Request, res: Response): Promise<Response> => {
+  const { ticketId } = req.params;
+  const { query , page } = req.query;
+  if (!ticketId || !query) {
+    return res.status(400).json({ error: "Parâmetros de ticketId e query são necessários" });
+  }
+
+  try {
+    const result = await SearchService({ 
+      query: String(query),
+      ticketId: Number(ticketId),
+      page: Number(page) || 1,
+      size: Number(10)
+    });
+     return res.status(200).json(result);
+  } catch (error) {
+    console.error('Erro ao buscar mensagens no Elasticsearch:', error);
+    return res.status(500).json({ error: 'Erro ao buscar mensagens.' });
+  }
+}
+
+
