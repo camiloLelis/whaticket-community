@@ -5,11 +5,15 @@ import uploadConfig from "../config/upload";
 
 import * as MessageController from "../controllers/MessageController";
 
+
 const messageRoutes = Router();
 
 const upload = multer(uploadConfig);
 
 messageRoutes.get("/messages/:ticketId", isAuth, MessageController.index);
+
+messageRoutes.get("/search/:ticketId", isAuth, MessageController.searchMessagesControlerasync); 
+
 
 messageRoutes.post(
   "/messages/:ticketId",
