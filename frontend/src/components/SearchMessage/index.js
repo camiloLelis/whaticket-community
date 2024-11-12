@@ -6,6 +6,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import Drawer from "@material-ui/core/Drawer";
 import Paper from "@material-ui/core/Paper";
 import SearchTermsConversation from "../SearchTermsConversation";
+import { ReplyMessageProvider } from "../../context/ReplyingMessage/ReplyingMessageContext";
 
 const drawerWidth = 320;
 
@@ -68,11 +69,13 @@ const SearchMessage = ({ open, onClose }) => {
 					<CloseIcon />
 				</IconButton>
 			</div>
+			<ReplyMessageProvider>
 			<div className={classes.content}>
 				<Paper square variant="outlined" style={{ padding: 16 }}>
-					<SearchTermsConversation />
+					<SearchTermsConversation onClose={onClose}/>
 				</Paper>
 			</div>
+			</ReplyMessageProvider>
 		</Drawer>
 	);
 };

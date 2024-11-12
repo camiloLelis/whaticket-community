@@ -1,9 +1,32 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
+import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
+import { Tooltip, makeStyles } from '@material-ui/core';
 
-const SearchMessages = () => {
+
+
+const useStyles = makeStyles((theme) => ({
+    clickableMessageItem: {
+      cursor: "pointer", /* Ícone de mãozinha */
+      padding: "10px",
+      borderRadius: "5px",
+      transition: "background-color 0.3s ease", /* Transição suave */
+      
+      // Aplica o estilo de hover diretamente no item
+      "&:hover": {
+        backgroundColor: "#f0f0f0", /* Cor de fundo ao passar o mouse */
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+        color: "#007BFF", /* Mudança de cor do texto */
+        fontWeight: "bold", /* Torna o texto em negrito */
+        transform: "scale(1.05)", /* Aumenta o tamanho ao passar o mouse */
+      },
+    },
+  }));
+  
+
+const SearchMessages = ({onClose}) => {
     const { ticketId } = useParams();
     const [searchTerm, setSearchTerm] = useState("");
     const [messages, setMessages] = useState([]);
@@ -11,12 +34,20 @@ const SearchMessages = () => {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const observer = useRef(null);
+    const { valueSearch, setValueSearch } = useContext(ReplyMessageContext); 
+    const classes = useStyles();
 
     const handleChange = useCallback((e) => setSearchTerm(e.target.value), []);
 
     const regex = useMemo(() => new RegExp(`(${searchTerm})`, "gi"), [searchTerm]);
 
     const highlightTerm = useCallback((text) => text.replace(regex, "<strong>$1</strong>"), [regex]);
+
+    const setAndClose = useCallback((message) => {
+        console.log(message._source)
+        setValueSearch(message._source);
+        onClose();
+    }, [onClose]);
 
     const handleSearch = useCallback(async (currentPage) => {
         if (!searchTerm.trim()) {
@@ -78,7 +109,10 @@ const SearchMessages = () => {
     }, [page, handleSearch]);
 
     const MessageItem = React.memo(({ message, lastMessageRef }) => (
-        <li ref={lastMessageRef}>
+        <Tooltip title="Clique para direcionar até a mensagem" arrow>
+        <li ref={lastMessageRef} 
+            onClick={() => setAndClose(message)}
+            className={classes.clickableMessageItem}>
             <h6>
                 {new Date(message._source.message_date).toLocaleDateString('pt-BR', {
                     day: '2-digit',
@@ -87,7 +121,9 @@ const SearchMessages = () => {
                 })}
             </h6>
             <p dangerouslySetInnerHTML={{ __html: message.contentWithHighlight }}></p>
+                
         </li>
+        </Tooltip>
     ));
 
     return (
@@ -109,12 +145,13 @@ const SearchMessages = () => {
                             key={message.id}
                             message={message}
                             lastMessageRef={messages.length === index + 1 ? lastMessageRef : null}
+
                         />
                     ))
                 )}
             </ul>
             {loading && page > 1 && <p>Carregando...</p>}
-            {!hasMore && messages.length > 0 && <p>Você chegou ao fim!</p>}
+            {!hasMore && messages.length > 0 && <p>essas foram as mensagens encontradas</p>}
         </div>
     );
 };
