@@ -43,9 +43,8 @@ const SearchMessages = ({onClose}) => {
 
     const highlightTerm = useCallback((text) => text.replace(regex, "<strong>$1</strong>"), [regex]);
 
-    const setAndClose = useCallback((message) => {
-        console.log(message._source)
-        setValueSearch(message._source);
+    const setAndClose = useCallback(async(message) => {
+        await setValueSearch(message._source);
         onClose();
     }, [onClose]);
 
