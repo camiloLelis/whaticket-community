@@ -1,15 +1,7 @@
-#!/bin/bash
 
-# Nome do índice
-INDEX_NAME="messages"
+// só rodar direto no terminal
 
-# Verificar se o Elasticsearch está funcionando (ping)
-echo "Verificando o status do Elasticsearch..."
-curl -X GET "localhost:9200/_cluster/health?pretty" > /dev/null
-
-# Criar o índice
-echo "Criando o índice '$INDEX_NAME'..."
-curl -X PUT "http://localhost:9200/$INDEX_NAME?pretty" -H 'Content-Type: application/json' -d'
+curl -X PUT "http://localhost:9200/messages?pretty" -H 'Content-Type: application/json' -d'
 {
   "settings": {
     "analysis": {
@@ -39,21 +31,10 @@ curl -X PUT "http://localhost:9200/$INDEX_NAME?pretty" -H 'Content-Type: applica
       "message_body": {
         "type": "text",
         "analyzer": "standard"
-      }
-        "ticketId" : {
-        "type" : "integer"
+      },
+      "ticketId": {
+        "type": "integer"
       }
     }
   }
-}
-'
-
-# Confirmar se o índice foi criado com sucesso
-if [ $? -eq 0 ]; then
-  echo "Índice '$INDEX_NAME' criado com sucesso."
-else
-  echo "Falha ao criar o índice '$INDEX_NAME'."
-fi
-
-# Finaliza o script, não é necessário reiniciar o Elasticsearch
-echo "Processo de criação de índice concluído."
+}'

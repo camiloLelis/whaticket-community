@@ -1,0 +1,23 @@
+o script mariadb_to_es.py serve para pegar os dados da coluna Messages do mariadb
+e sincronizar no Index do elastic Search, isso quando já estiver dados no mariadb e ainda não estiver
+sincronizados, ou se tiver rodado alguma query no maria db para popular dados de mensagens para testes,
+como esta query aqui :
+
+
+CREATE DEFINER=`whaticket`@`%` PROCEDURE `InsertMessages3`()
+BEGIN
+  DECLARE i INT DEFAULT 1;
+  WHILE i <= 20 DO
+    INSERT INTO `Messages`(`id`, `ticketId`, `body`, `fromMe`, `updatedAt`, `createdAt`) 
+    VALUES (UUID(), 2, CONCAT('fui ao mercado para comprar maças, eu comprei ', i, ' maças '), 1, DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY));
+    SET i = i + 1;
+  END WHILE;
+END
+
+CALL `InsertMessages3`;
+
+que serve para popular a tabela messages do mariadb.
+
+para rodar o script precisa de instalar : pip install --user pymysql elasticsearch
+ caso não de certo pode ser : pip install elasticsearch==7.10.1
+ou outra versão do elasticsearch que estiver usando, usei esta pois minha maquina não rodou a mais atual.
