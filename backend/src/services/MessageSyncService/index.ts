@@ -8,7 +8,6 @@ export const syncMessageToElasticSearch = async (message: Message) => {
       message_body: message.body, 
       message_date: message.createdAt,
       ticketId: message.ticketId,
-      id: message.id
     };
 
     const response = await client.index({

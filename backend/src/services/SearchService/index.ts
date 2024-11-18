@@ -56,7 +56,6 @@ export const SearchService = async ({ query, ticketId, page, size=40 }: SearchQu
 
   const total = response.body.hits.total.value - size * (page - 1);
   const searchResul = response.body.hits.hits;
-  console.log("teste");
   return [searchResul, total] as SearchResult[];
 };
 

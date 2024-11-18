@@ -13,7 +13,7 @@ const upload = multer(uploadConfig);
 messageRoutes.get("/messages/:ticketId", isAuth, MessageController.index);
 
 messageRoutes.get("/search/:ticketId", isAuth, MessageController.searchMessagesControlerasync); 
-
+messageRoutes.get("/searchMessage/:ticketId", isAuth, MessageController.searchMessagesControler);
 
 messageRoutes.post(
   "/messages/:ticketId",

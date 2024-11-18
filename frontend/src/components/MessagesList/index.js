@@ -278,6 +278,23 @@ const reducer = (state, action) => {
     return [...newMessages, ...state];
   }
 
+  if (action.type === "searchMessages") {
+    const messages = action.payload.messages;
+    const targetId = action.payload.id;
+    const updatedMessages = messages.map((message) => {
+      if (message.id === targetId) {
+        return {
+          ...message,
+          body: {isDestac:`<b>${message.body}</b>`},
+        };
+      }
+      return message;
+    });
+
+    console.log(targetId);
+    return [...updatedMessages];
+  }
+
   if (action.type === "ADD_MESSAGE") {
     const newMessage = action.payload;
     const messageIndex = state.findIndex((m) => m.id === newMessage.id);
@@ -306,6 +323,7 @@ const reducer = (state, action) => {
     return [];
   }
 };
+
 
 const MessagesList = ({ ticketId, isGroup }) => {
   const classes = useStyles();
@@ -336,7 +354,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
           const { data } = await api.get("/messages/" + ticketId, {
             params: { pageNumber },
           });
-
+        
           if (currentTicketId.current === ticketId) {
             dispatch({ type: "LOAD_MESSAGES", payload: data.messages });
             setHasMore(data.hasMore);
@@ -372,6 +390,14 @@ const MessagesList = ({ ticketId, isGroup }) => {
       if (data.action === "update") {
         dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
       }
+
+      if (data.action === "teste") {
+        console.log(" deu certo !!!", data.message);
+        dispatch({ type: "searchMessages", payload: data.message });
+        setHasMore(true);
+        setLoading(false);
+      }
+
     });
 
     return () => {
@@ -619,7 +645,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                 ) && checkMessageMedia(message)}
                 <div className={classes.textContentItem}>
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                  <MarkdownWrapper dangerouslySetInnerHTML={{ __html: message.body }}></MarkdownWrapper>
                   <span className={classes.timestamp}>
                     {format(parseISO(message.createdAt), "HH:mm")}
                   </span>
@@ -659,7 +685,8 @@ const MessagesList = ({ ticketId, isGroup }) => {
                     />
                   )}
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                  { message.body.isDestac ? <p dangerouslySetInnerHTML={{ __html: message.body.isDestac }}></p> :
+                  <MarkdownWrapper>{ message.body }</MarkdownWrapper>}
                   <span className={classes.timestamp}>
                     {format(parseISO(message.createdAt), "HH:mm")}
                     {renderMessageAck(message)}
