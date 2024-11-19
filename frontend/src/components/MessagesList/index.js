@@ -31,6 +31,7 @@ import whatsBackground from "../../assets/wa-background.png";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import Audio from "../Audio";
+import { tr } from "date-fns/locale";
 
 const useStyles = makeStyles((theme) => ({
   messagesListWrapper: {
@@ -291,7 +292,6 @@ const reducer = (state, action) => {
       return message;
     });
 
-    console.log(targetId);
     return [...updatedMessages];
   }
 
@@ -333,16 +333,14 @@ const MessagesList = ({ ticketId, isGroup }) => {
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const lastMessageRef = useRef();
-
   const [selectedMessage, setSelectedMessage] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
-
+  const [isSearching, setIsSearching] = useState(false); 
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
-
     currentTicketId.current = ticketId;
   }, [ticketId]);
 
@@ -391,11 +389,13 @@ const MessagesList = ({ ticketId, isGroup }) => {
         dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
       }
 
-      if (data.action === "teste") {
-        console.log(" deu certo !!!", data.message);
+      if (data.action === "wanted") {
         dispatch({ type: "searchMessages", payload: data.message });
         setHasMore(true);
         setLoading(false);
+        scrollToBottom();
+        setIsSearching(true);
+        setPageNumber(0);
       }
 
     });
@@ -417,7 +417,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
 
   const handleScroll = (e) => {
     if (!hasMore) return;
-    const { scrollTop } = e.currentTarget;
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
 
     if (scrollTop === 0) {
       document.getElementById("messagesList").scrollTop = 1;
@@ -429,6 +429,10 @@ const MessagesList = ({ ticketId, isGroup }) => {
 
     if (scrollTop < 50) {
       loadMore();
+    }
+    if (scrollHeight - scrollTop - clientHeight == 0 &&  isSearching === true) {
+      setIsSearching(false);
+      alert("para voltar as ultimas mensagens role para cima !!")
     }
   };
 

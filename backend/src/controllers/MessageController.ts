@@ -53,7 +53,7 @@ export const searchMessagesControler = async (req: Request, res: Response): Prom
 
    const io = getIO();
     io.to(ticketId.toString()).emit("appMessage", {
-      action: "teste",
+      action: "wanted",
       message:{ count, messages, ticket, hasMore, id } 
     });
 
@@ -129,33 +129,6 @@ export const searchMessagesControlerasync = async (req: Request, res: Response):
   }
 }
 
-/* export const searchMessagesControler = async (req: Request, res: Response): Promise<Response> => {
-  const { ticketId } = req.params;
-  const { id } = req.query;
-  if (!ticketId || !id) {
-    return res.status(400).json({ error: "Parâmetros de ticketId e query são necessários" });
-  }
-  try {
-    const message = await SearchService({ 
-      query: String("teste"),
-      ticketId: Number(ticketId),
-      page: 1,
-      size: Number(10)
-    });
-    console.log("teste no controler..", "message",ticketId)
-   const io = getIO();
-    io.to(ticketId.toString()).emit("appMessage", {
-      action: "teste",
-      message
-    });
-
-    return res.send()
- 
-  } catch (error) {
-    console.error('Erro ao buscar mensagens no Elasticsearch:', error);
-    return res.status(500).json({ error: 'Erro ao buscar mensagens.' });
-  }
-} */
 
 
 
