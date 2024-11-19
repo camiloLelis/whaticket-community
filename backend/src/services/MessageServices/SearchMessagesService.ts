@@ -24,7 +24,6 @@ const SearchMessagesService = async ({ ticketId, searchTerm, page }: SearchMessa
             order: [["createdAt", "DESC"]]
         });
 
-        console.log("Resultado da busca FULLTEXT", count, messages);
 
         return {
             count,

@@ -46,7 +46,6 @@ const SearchMessages = ({onClose}) => {
     const highlightTerm = useCallback((text) => text.replace(regex, "<strong>$1</strong>"), [regex]);
 
     const setAndClose = useCallback(async(message) => {
-        console.log("message", message._id)
         await api.get(`/searchMessage/${ticketId}`, { params: { id : message._id, date: message._source.message_date} });
         await setValueSearch(message._source);
         onClose();
