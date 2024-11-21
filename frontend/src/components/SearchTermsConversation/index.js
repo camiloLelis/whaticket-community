@@ -5,9 +5,6 @@ import toastError from "../../errors/toastError";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import { Tooltip, makeStyles } from '@material-ui/core';
 
-import openSocket from "../../services/socket-io";
-
-
 
 const useStyles = makeStyles((theme) => ({
     clickableMessageItem: {
@@ -36,7 +33,7 @@ const SearchMessages = ({onClose}) => {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const observer = useRef(null);
-    const { valueSearch, setValueSearch } = useContext(ReplyMessageContext); 
+    const { setValueSearch } = useContext(ReplyMessageContext); 
     const classes = useStyles();
 
     const handleChange = useCallback((e) => setSearchTerm(e.target.value), []);
@@ -49,7 +46,7 @@ const SearchMessages = ({onClose}) => {
         await api.get(`/searchMessage/${ticketId}`, { params: { id : message._id, date: message._source.message_date} });
         await setValueSearch(message._source);
         onClose();
-    }, [onClose]);
+    }, [onClose, ticketId, setValueSearch]);
 
     const handleSearch = useCallback(async (currentPage) => {
         if (!searchTerm.trim()) {
@@ -88,7 +85,7 @@ const SearchMessages = ({onClose}) => {
             }
         }, 1000);
         return () => clearTimeout(delayDebounceFn);
-    }, [searchTerm]);
+    }, [searchTerm, handleSearch]);
 
     const lastMessageRef = useCallback((node) => {
         if (loading || !hasMore) return;

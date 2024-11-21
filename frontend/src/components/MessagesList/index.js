@@ -11,7 +11,13 @@ import {
   Divider,
   IconButton,
   makeStyles,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@material-ui/core";
+
 import {
   AccessTime,
   Block,
@@ -31,7 +37,7 @@ import whatsBackground from "../../assets/wa-background.png";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import Audio from "../Audio";
-import { tr } from "date-fns/locale";
+
 
 const useStyles = makeStyles((theme) => ({
   messagesListWrapper: {
@@ -394,7 +400,6 @@ const MessagesList = ({ ticketId, isGroup }) => {
         setHasMore(true);
         setLoading(false);
         scrollToBottom();
-        setIsSearching(true);
         setPageNumber(0);
       }
 
@@ -409,11 +414,22 @@ const MessagesList = ({ ticketId, isGroup }) => {
     setPageNumber((prevPageNumber) => prevPageNumber + 1);
   };
 
-  const scrollToBottom = () => {
+  const scrollToBottom = (offset = 50) => {
     if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({});
+      const container = lastMessageRef.current.parentElement;
+  
+      if (container) {
+        const targetPosition =
+          lastMessageRef.current.offsetTop - container.clientHeight + offset;
+  
+        container.scrollTo({
+          top: targetPosition,
+          behavior: "smooth",
+        });
+      }
     }
   };
+  
 
   const handleScroll = (e) => {
     if (!hasMore) return;
@@ -430,9 +446,8 @@ const MessagesList = ({ ticketId, isGroup }) => {
     if (scrollTop < 50) {
       loadMore();
     }
-    if (scrollHeight - scrollTop - clientHeight == 0 &&  isSearching === true) {
-      setIsSearching(false);
-      alert("para voltar as ultimas mensagens role para cima !!")
+    if (scrollHeight - scrollTop - clientHeight === 0 &&  pageNumber === 0) {
+      setIsSearching(true);
     }
   };
 
@@ -709,6 +724,31 @@ const MessagesList = ({ ticketId, isGroup }) => {
 
   return (
     <div className={classes.messagesListWrapper}>
+
+
+         {isSearching === true && (<Dialog
+      open={isSearching}
+      onClose={() => setIsSearching(false)}
+      aria-labelledby="alert-dialog-title"
+      aria-describedby="alert-dialog-description"
+      >
+      <DialogTitle id="alert-dialog-title">
+          {"Buscando mensagens"}
+      </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+              <p>para voltar as ultimas mensagens role para cima !!</p>
+           </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+            <Button onClick={() => setIsSearching(false)} color="primary">
+              {"Fechar"}
+            </Button>
+        </DialogActions>
+    </Dialog>)}
+
+
+
       <MessageOptionsMenu
         message={selectedMessage}
         anchorEl={anchorEl}
