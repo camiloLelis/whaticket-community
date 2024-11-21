@@ -4,7 +4,9 @@ import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { IconButton } from "@material-ui/core";
 import { MoreVert, Replay } from "@material-ui/icons";
+import SearchIcon from "@material-ui/icons/Search";
 
+import SearchMessage from "../SearchMessage";
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import TicketOptionsMenu from "../TicketOptionsMenu";
@@ -29,6 +31,7 @@ const TicketActionButtons = ({ ticket }) => {
 	const history = useHistory();
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [loading, setLoading] = useState(false);
+	const [openSearchMessage, setOpenSearchMessage] = useState(false);
 	const ticketOptionsMenuOpen = Boolean(anchorEl);
 	const { user } = useContext(AuthContext);
 
@@ -58,6 +61,15 @@ const TicketActionButtons = ({ ticket }) => {
 			setLoading(false);
 			toastError(err);
 		}
+	};
+
+	// Funções para abrir e fechar o modal de pesquisa
+	const handleOpenSearchMessage = () => {
+		setOpenSearchMessage(true);
+	};
+
+	const handleCloseSearchMessage = () => {
+		setOpenSearchMessage(false);
 	};
 
 	return (
@@ -91,6 +103,9 @@ const TicketActionButtons = ({ ticket }) => {
 					>
 						{i18n.t("messagesList.header.buttons.resolve")}
 					</ButtonWithSpinner>
+					<IconButton onClick={() => handleOpenSearchMessage(true)}>
+						<SearchIcon />
+					</IconButton>
 					<IconButton onClick={handleOpenTicketOptionsMenu}>
 						<MoreVert />
 					</IconButton>
@@ -99,6 +114,11 @@ const TicketActionButtons = ({ ticket }) => {
 						anchorEl={anchorEl}
 						menuOpen={ticketOptionsMenuOpen}
 						handleClose={handleCloseTicketOptionsMenu}
+					/>
+					
+					<SearchMessage
+						open={openSearchMessage} 
+						onClose={handleCloseSearchMessage} 
 					/>
 				</>
 			)}

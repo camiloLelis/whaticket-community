@@ -11,7 +11,13 @@ import {
   Divider,
   IconButton,
   makeStyles,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@material-ui/core";
+
 import {
   AccessTime,
   Block,
@@ -31,6 +37,7 @@ import whatsBackground from "../../assets/wa-background.png";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import Audio from "../Audio";
+
 
 const useStyles = makeStyles((theme) => ({
   messagesListWrapper: {
@@ -278,6 +285,22 @@ const reducer = (state, action) => {
     return [...newMessages, ...state];
   }
 
+  if (action.type === "searchMessages") {
+    const messages = action.payload.messages;
+    const targetId = action.payload.id;
+    const updatedMessages = messages.map((message) => {
+      if (message.id === targetId) {
+        return {
+          ...message,
+          body: {isDestac:`<b>${message.body}</b>`},
+        };
+      }
+      return message;
+    });
+
+    return [...updatedMessages];
+  }
+
   if (action.type === "ADD_MESSAGE") {
     const newMessage = action.payload;
     const messageIndex = state.findIndex((m) => m.id === newMessage.id);
@@ -307,6 +330,7 @@ const reducer = (state, action) => {
   }
 };
 
+
 const MessagesList = ({ ticketId, isGroup }) => {
   const classes = useStyles();
 
@@ -315,16 +339,14 @@ const MessagesList = ({ ticketId, isGroup }) => {
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const lastMessageRef = useRef();
-
   const [selectedMessage, setSelectedMessage] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
-
+  const [isSearching, setIsSearching] = useState(false); 
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
-
     currentTicketId.current = ticketId;
   }, [ticketId]);
 
@@ -336,7 +358,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
           const { data } = await api.get("/messages/" + ticketId, {
             params: { pageNumber },
           });
-
+        
           if (currentTicketId.current === ticketId) {
             dispatch({ type: "LOAD_MESSAGES", payload: data.messages });
             setHasMore(data.hasMore);
@@ -372,6 +394,15 @@ const MessagesList = ({ ticketId, isGroup }) => {
       if (data.action === "update") {
         dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
       }
+
+      if (data.action === "wanted") {
+        dispatch({ type: "searchMessages", payload: data.message });
+        setHasMore(true);
+        setLoading(false);
+        scrollToBottom();
+        setPageNumber(0);
+      }
+
     });
 
     return () => {
@@ -383,15 +414,26 @@ const MessagesList = ({ ticketId, isGroup }) => {
     setPageNumber((prevPageNumber) => prevPageNumber + 1);
   };
 
-  const scrollToBottom = () => {
+  const scrollToBottom = (offset = 50) => {
     if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({});
+      const container = lastMessageRef.current.parentElement;
+  
+      if (container) {
+        const targetPosition =
+          lastMessageRef.current.offsetTop - container.clientHeight + offset;
+  
+        container.scrollTo({
+          top: targetPosition,
+          behavior: "smooth",
+        });
+      }
     }
   };
+  
 
   const handleScroll = (e) => {
     if (!hasMore) return;
-    const { scrollTop } = e.currentTarget;
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
 
     if (scrollTop === 0) {
       document.getElementById("messagesList").scrollTop = 1;
@@ -403,6 +445,9 @@ const MessagesList = ({ ticketId, isGroup }) => {
 
     if (scrollTop < 50) {
       loadMore();
+    }
+    if (scrollHeight - scrollTop - clientHeight === 0 &&  pageNumber === 0) {
+      setIsSearching(true);
     }
   };
 
@@ -619,7 +664,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                 ) && checkMessageMedia(message)}
                 <div className={classes.textContentItem}>
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                  <MarkdownWrapper dangerouslySetInnerHTML={{ __html: message.body }}></MarkdownWrapper>
                   <span className={classes.timestamp}>
                     {format(parseISO(message.createdAt), "HH:mm")}
                   </span>
@@ -659,7 +704,8 @@ const MessagesList = ({ ticketId, isGroup }) => {
                     />
                   )}
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                  { message.body.isDestac ? <p dangerouslySetInnerHTML={{ __html: message.body.isDestac }}></p> :
+                  <MarkdownWrapper>{ message.body }</MarkdownWrapper>}
                   <span className={classes.timestamp}>
                     {format(parseISO(message.createdAt), "HH:mm")}
                     {renderMessageAck(message)}
@@ -678,6 +724,31 @@ const MessagesList = ({ ticketId, isGroup }) => {
 
   return (
     <div className={classes.messagesListWrapper}>
+
+
+         {isSearching === true && (<Dialog
+      open={isSearching}
+      onClose={() => setIsSearching(false)}
+      aria-labelledby="alert-dialog-title"
+      aria-describedby="alert-dialog-description"
+      >
+      <DialogTitle id="alert-dialog-title">
+          {"Buscando mensagens"}
+      </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+              <p>para voltar as ultimas mensagens role para cima !!</p>
+           </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+            <Button onClick={() => setIsSearching(false)} color="primary">
+              {"Fechar"}
+            </Button>
+        </DialogActions>
+    </Dialog>)}
+
+
+
       <MessageOptionsMenu
         message={selectedMessage}
         anchorEl={anchorEl}
