@@ -292,7 +292,7 @@ const reducer = (state, action) => {
       if (message.id === targetId) {
         return {
           ...message,
-          body: {isDestac:`<b>${message.body}</b>`},
+          body: {isDestac:`${message.body}`},
         };
       }
       return message;
@@ -332,6 +332,7 @@ const reducer = (state, action) => {
 
 
 const MessagesList = ({ ticketId, isGroup }) => {
+
   const classes = useStyles();
 
   const [messagesList, dispatch] = useReducer(reducer, []);
@@ -351,6 +352,9 @@ const MessagesList = ({ ticketId, isGroup }) => {
   }, [ticketId]);
 
   useEffect(() => {
+    if (pageNumber === 0 ) { 
+      return;
+    } 
     setLoading(true);
     const delayDebounceFn = setTimeout(() => {
       const fetchMessages = async () => {
@@ -399,8 +403,8 @@ const MessagesList = ({ ticketId, isGroup }) => {
         dispatch({ type: "searchMessages", payload: data.message });
         setHasMore(true);
         setLoading(false);
-        scrollToBottom();
         setPageNumber(0);
+        scrollToBottom();
       }
 
     });
@@ -414,19 +418,9 @@ const MessagesList = ({ ticketId, isGroup }) => {
     setPageNumber((prevPageNumber) => prevPageNumber + 1);
   };
 
-  const scrollToBottom = (offset = 50) => {
+  const scrollToBottom = () => {
     if (lastMessageRef.current) {
-      const container = lastMessageRef.current.parentElement;
-  
-      if (container) {
-        const targetPosition =
-          lastMessageRef.current.offsetTop - container.clientHeight + offset;
-  
-        container.scrollTo({
-          top: targetPosition,
-          behavior: "smooth",
-        });
-      }
+      lastMessageRef.current.scrollIntoView({});
     }
   };
   
@@ -446,7 +440,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
     if (scrollTop < 50) {
       loadMore();
     }
-    if (scrollHeight - scrollTop - clientHeight === 0 &&  pageNumber === 0) {
+    if (scrollHeight - scrollTop - clientHeight === 0 &&  pageNumber === 0 ) {
       setIsSearching(true);
     }
   };
@@ -664,7 +658,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                 ) && checkMessageMedia(message)}
                 <div className={classes.textContentItem}>
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  <MarkdownWrapper dangerouslySetInnerHTML={{ __html: message.body }}></MarkdownWrapper>
+                  <MarkdownWrapper>{ message.body }</MarkdownWrapper>
                   <span className={classes.timestamp}>
                     {format(parseISO(message.createdAt), "HH:mm")}
                   </span>
@@ -704,7 +698,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                     />
                   )}
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  { message.body.isDestac ? <p dangerouslySetInnerHTML={{ __html: message.body.isDestac }}></p> :
+                  { message.body.isDestac ? <MarkdownWrapper><b> { message.body.isDestac }</b></MarkdownWrapper> :
                   <MarkdownWrapper>{ message.body }</MarkdownWrapper>}
                   <span className={classes.timestamp}>
                     {format(parseISO(message.createdAt), "HH:mm")}
