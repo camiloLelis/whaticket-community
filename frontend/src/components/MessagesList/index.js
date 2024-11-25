@@ -698,7 +698,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                     />
                   )}
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  { message.body.isDestac ? <MarkdownWrapper><b> { message.body.isDestac }</b></MarkdownWrapper> :
+                  { message.body.isDestac ? <p><b> { message.body.isDestac }</b></p> :
                   <MarkdownWrapper>{ message.body }</MarkdownWrapper>}
                   <span className={classes.timestamp}>
                     {format(parseISO(message.createdAt), "HH:mm")}
